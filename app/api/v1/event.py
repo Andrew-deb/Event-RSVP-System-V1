@@ -89,3 +89,24 @@ def get_event_rsvps(event_id: int):
     # Get all RSVPs for this event
     event_rsvps = [rsvp for rsvp in rsvps if rsvp["event_id"] == event_id]
     return event_rsvps
+
+
+# DELETE /events/{event_id}/rspvs - Removes an event and the corresponding RSVPs
+@event_router.delete("/{event_id}", status_code=status.HTTP_200_OK)
+def delete_event(event_id: int):
+    event_to_delete = None
+
+    for event in events:
+        if event["id"] == event_id:
+            event_to_delete = event
+            break
+
+    if not event_to_delete:
+        raise HTTPException(status_code=404, detail="Event not found")
+
+    events.remove(event_to_delete)
+
+    # Remove related RSVPs
+    rsvps[:] = [rsvp for rsvp in rsvps if rsvp["event_id"] != event_id]
+
+    return {"message": "Event deleted successfully"}
