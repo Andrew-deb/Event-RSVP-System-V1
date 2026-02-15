@@ -90,6 +90,37 @@ def get_event_rsvps(event_id: int):
     event_rsvps = [rsvp for rsvp in rsvps if rsvp["event_id"] == event_id]
     return event_rsvps
 
+# PATCH /events/{event_id} - Update an event
+@event_router.patch("/{event_id}", status_code=status.HTTP_200_OK)
+async def update_event(
+    event_id: int,
+    title: Optional[str] = Form(None),
+    description: Optional[str] = Form(None),
+    date: Optional[str] = Form(None),
+    location: Optional[str] = Form(None),
+    flyer: Optional[UploadFile] = File(None)
+):
+    for event in events:
+        if event["id"] == event_id:
+
+            if title:
+                event["title"] = title
+            if description:
+                event["description"] = description
+            if date:
+                event["date"] = date
+            if location:
+                event["location"] = location
+            if flyer:
+                event["flyer_filename"] = flyer.filename
+
+            return {
+                "message": "Event updated successfully",
+                "updated_event": event
+            }
+
+    raise HTTPException(status_code=404, detail="Event not found")
+
 
 # DELETE /events/{event_id}/rspvs - Removes an event and the corresponding RSVPs
 @event_router.delete("/{event_id}", status_code=status.HTTP_200_OK)
